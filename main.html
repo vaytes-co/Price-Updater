@@ -1,0 +1,1930 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta
+    name="description"
+    content="Kalkulator update harga jual produk berdasarkan profit dan harga modal."
+  >
+  <title>Price Updater Pasifik Teknik</title>
+
+  <style>
+    /* Variable */
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --bg: #f5f7fb;
+      --card: #ffffff;
+      --text: #172033;
+      --muted: #6b7280;
+      --border: #e5e7eb;
+      --primary: #2563eb;
+      --primary-dark: #1d4ed8;
+      --soft: #eff6ff;
+      --danger: #dc2626;
+      --danger-soft: #fef2f2;
+      --success: #16a34a;
+    }
+
+    /* Base */
+
+    body {
+      min-height: 100vh;
+      padding: 32px 16px;
+      background: var(--bg);
+      color: var(--text);
+      font-family:
+        Inter,
+        ui-sans-serif,
+        system-ui,
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        sans-serif;
+    }
+
+    .container {
+      width: min(960px, 100%);
+      margin: 0 auto;
+    }
+
+    /* Header */
+
+    .header {
+      margin-bottom: 28px;
+      text-align: center;
+    }
+
+    .badge {
+      display: inline-flex;
+      margin-bottom: 14px;
+      padding: 7px 12px;
+      border-radius: 999px;
+      background: var(--soft);
+      color: var(--primary);
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    h1 {
+      margin-bottom: 10px;
+      font-size: clamp(28px, 5vw, 42px);
+      line-height: 1.1;
+      letter-spacing: -1px;
+    }
+
+    .subtitle {
+      max-width: 620px;
+      margin: auto;
+      color: var(--muted);
+      font-size: 15px;
+      line-height: 1.6;
+    }
+
+    /* Mode */
+
+    .mode-card {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 18px;
+      padding: 8px;
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      background: var(--card);
+      box-shadow: 0 8px 30px rgba(15, 23, 42, 0.05);
+    }
+
+    .mode-btn {
+      padding: 14px 18px;
+      border: 0;
+      border-radius: 12px;
+      background: transparent;
+      color: var(--muted);
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: 0.2s ease;
+    }
+
+    .mode-btn:hover {
+      background: #f8fafc;
+      color: var(--text);
+    }
+
+    .mode-btn.active {
+      background: var(--primary);
+      color: #ffffff;
+    }
+
+    /* Layout */
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 18px;
+    }
+
+    .card {
+      padding: 24px;
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      background: var(--card);
+      box-shadow: 0 8px 30px rgba(15, 23, 42, 0.05);
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    /* Card */
+
+    .card-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .icon {
+      display: grid;
+      width: 38px;
+      height: 38px;
+      flex-shrink: 0;
+      place-items: center;
+      border-radius: 10px;
+      background: var(--soft);
+      color: var(--primary);
+      font-size: 16px;
+      font-weight: 800;
+    }
+
+    .card-title h2 {
+      font-size: 17px;
+    }
+
+    .card-title p {
+      margin-top: 2px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    /* Form */
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 18px;
+    }
+
+    .field {
+      margin-bottom: 17px;
+    }
+
+    .field:last-child {
+      margin-bottom: 0;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .input-wrap {
+      position: relative;
+    }
+
+    .prefix {
+      position: absolute;
+      z-index: 1;
+      top: 50%;
+      left: 14px;
+      transform: translateY(-50%);
+      color: var(--muted);
+      font-size: 14px;
+      font-weight: 600;
+      pointer-events: none;
+    }
+
+    input {
+      width: 100%;
+      height: 48px;
+      padding: 0 14px 0 44px;
+      border: 1px solid var(--border);
+      border-radius: 11px;
+      outline: none;
+      background: #ffffff;
+      color: var(--text);
+      font-size: 15px;
+      transition:
+        border-color 0.2s,
+        box-shadow 0.2s;
+    }
+
+    input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    }
+
+    input.invalid {
+      border-color: var(--danger);
+      background: var(--danger-soft);
+    }
+
+    .error {
+      display: none;
+      margin-top: 7px;
+      color: var(--danger);
+      font-size: 12px;
+      line-height: 1.4;
+    }
+
+    /* Calculation */
+
+    .calculated {
+      display: none;
+      margin-top: 17px;
+      padding: 13px 14px;
+      border: 1px solid var(--border);
+      border-radius: 11px;
+      background: #f8fafc;
+    }
+
+    .calculated span {
+      display: block;
+      margin-bottom: 3px;
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    .calculated strong {
+      font-size: 15px;
+    }
+
+    /* Sample Product */
+
+    .sample-section {
+      display: none;
+    }
+
+    .sample-section.show {
+      display: block;
+    }
+
+    .sample-intro {
+      margin-top: -10px;
+      margin-bottom: 18px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
+    .samples {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+    }
+
+    .sample {
+      padding: 16px;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      background: #fbfcfe;
+    }
+
+    .sample h3 {
+      margin-bottom: 14px;
+      font-size: 14px;
+    }
+
+    .sample .field {
+      margin-bottom: 12px;
+    }
+
+    .sample label {
+      font-size: 12px;
+    }
+
+    .sample input {
+      height: 44px;
+      padding-left: 42px;
+      font-size: 14px;
+    }
+
+    /* Hasil */
+
+    .result-card {
+      padding: 28px;
+      border: none;
+      background: var(--text);
+      color: #ffffff;
+    }
+
+    .result-label {
+      margin-bottom: 8px;
+      color: #aeb7c7;
+      font-size: 13px;
+    }
+
+    .result-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+    }
+
+    .price {
+      font-size: clamp(30px, 6vw, 44px);
+      font-weight: 800;
+      line-height: 1.1;
+      letter-spacing: -1px;
+      word-break: break-word;
+    }
+
+    .copy-btn {
+      flex-shrink: 0;
+      padding: 12px 18px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 11px;
+      background: rgba(255, 255, 255, 0.1);
+      color: #ffffff;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: 0.2s ease;
+    }
+
+    .copy-btn:hover:not(:disabled) {
+      background: rgba(255, 255, 255, 0.18);
+    }
+
+    .copy-btn:disabled {
+      cursor: not-allowed;
+      opacity: 0.45;
+    }
+
+    .copy-btn.copied {
+      border-color: var(--success);
+      background: var(--success);
+    }
+
+    .result-message {
+      margin-top: 10px;
+      color: #aeb7c7;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    /* Rekomendasi Produk Baru */
+
+    .recommendations {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-top: 4px;
+    }
+
+    .recommendation-item {
+      padding: 16px;
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.06);
+    }
+
+    .recommendation-item span {
+      display: block;
+      margin-bottom: 7px;
+      color: #aeb7c7;
+      font-size: 12px;
+    }
+
+    .recommendation-item strong {
+      display: block;
+      font-size: 21px;
+      line-height: 1.2;
+    }
+
+    .recommendation-copy {
+      width: 100%;
+      margin-top: 12px;
+      padding: 9px 12px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 9px;
+      background: rgba(255, 255, 255, 0.08);
+      color: #ffffff;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: 0.2s ease;
+    }
+
+    .recommendation-copy:hover {
+      background: rgba(255, 255, 255, 0.16);
+    }
+
+    .recommendation-copy.copied {
+      border-color: var(--success);
+      background: var(--success);
+    }
+
+    /* Tombol Clear */
+
+    .btn-clear {
+      width: 100%;
+      padding: 14px 24px;
+      border: 1px solid var(--danger);
+      border-radius: 11px;
+      background: transparent;
+      color: var(--danger);
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: 0.2s ease;
+    }
+
+    .btn-clear:hover {
+      background: var(--danger-soft);
+    }
+
+    /* Footer */
+
+    footer {
+      margin-top: 24px;
+      color: var(--muted);
+      font-size: 12px;
+      text-align: center;
+    }
+
+    /* Responsive */
+
+    @media (max-width: 680px) {
+      body {
+        padding: 24px 12px;
+      }
+
+      .card {
+        padding: 20px;
+      }
+
+      .form-grid {
+        grid-template-columns: 1fr;
+        gap: 0;
+      }
+
+      .samples {
+        grid-template-columns: 1fr;
+      }
+
+      .recommendations {
+        grid-template-columns: 1fr;
+      }
+
+      .result-row {
+        align-items: stretch;
+        flex-direction: column;
+      }
+
+      .copy-btn {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <main class="container">
+
+    <!-- Header -->
+    <header class="header">
+      <div class="badge">Kalkulator Price Updater Pasifik Teknik</div>
+
+      <h1>Perhitungan Harga Jual Baru</h1>
+
+      <p class="subtitle">
+        Pilih kondisi produk, masukkan data yang diperlukan,
+        lalu kalkulator akan menentukan harga jual baru.
+      </p>
+    </header>
+
+    <!-- Pilih Jenis Produk -->
+    <section class="mode-card">
+
+      <button
+        type="button"
+        class="mode-btn active"
+        data-mode="lama"
+      >
+        Produk Lama
+      </button>
+
+      <button
+        type="button"
+        class="mode-btn"
+        data-mode="baru"
+      >
+        Produk Baru
+      </button>
+
+    </section>
+
+    <!-- Konten -->
+    <section class="grid">
+
+      <!-- Produk Lama -->
+      <div id="oldProductCard" class="card">
+
+        <div class="card-title">
+          <div class="icon">1</div>
+
+          <div>
+            <h2>Data Produk Lama</h2>
+            <p>
+              Masukkan data produk yang sudah memiliki harga jual.
+            </p>
+          </div>
+        </div>
+
+        <div class="form-grid">
+
+          <!-- Harga Modal Baru -->
+          <div class="field">
+
+            <label for="newBuy">
+              Harga Modal Baru
+            </label>
+
+            <div class="input-wrap">
+              <span class="prefix">Rp</span>
+
+              <input
+                id="newBuy"
+                type="text"
+                inputmode="decimal"
+                autocomplete="off"
+                placeholder="Masukkan harga modal"
+              >
+            </div>
+
+            <div
+              class="error"
+              id="newBuyError"
+            >
+              Harga modal baru harus lebih dari 0.
+            </div>
+
+          </div>
+
+          <!-- Jumlah Kenaikan -->
+          <div class="field">
+
+            <label for="increase">
+              Jumlah Kenaikan Harga
+            </label>
+
+            <div class="input-wrap">
+              <span class="prefix">Rp</span>
+
+              <input
+                id="increase"
+                type="text"
+                inputmode="decimal"
+                autocomplete="off"
+                placeholder="Masukkan kenaikan harga"
+              >
+            </div>
+
+            <div
+              class="error"
+              id="increaseError"
+            >
+              Jumlah kenaikan harga tidak boleh negatif.
+            </div>
+
+          </div>
+
+        </div>
+
+        <!-- Harga Modal Lama -->
+        <div
+          class="calculated"
+          id="oldBuyResult"
+        >
+          <span>Harga Modal Lama</span>
+
+          <strong id="oldBuyValue">-</strong>
+        </div>
+
+        <!-- Harga Jual Lama -->
+        <div
+          class="field"
+          style="margin-top: 17px;"
+        >
+
+          <label for="oldSell">
+            Harga Jual Lama
+          </label>
+
+          <div class="input-wrap">
+            <span class="prefix">Rp</span>
+
+            <input
+              id="oldSell"
+              type="text"
+              inputmode="decimal"
+              autocomplete="off"
+              placeholder="Masukkan harga jual"
+            >
+          </div>
+
+          <div
+            class="error"
+            id="oldSellError"
+          >
+            Harga jual lama harus lebih dari 0.
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- Produk Baru -->
+      <div
+        id="newProductCard"
+        class="card hidden"
+      >
+
+        <div class="card-title">
+          <div class="icon">1</div>
+
+          <div>
+            <h2>Data Produk Baru</h2>
+            <p>
+              Produk baru belum memiliki harga jual dan profit.
+            </p>
+          </div>
+        </div>
+
+        <div class="form-grid">
+
+          <div class="field">
+
+            <label for="newProductBuy">
+              Harga Modal Baru
+            </label>
+
+            <div class="input-wrap">
+              <span class="prefix">Rp</span>
+
+              <input
+                id="newProductBuy"
+                type="text"
+                inputmode="decimal"
+                autocomplete="off"
+                placeholder="Masukkan harga modal"
+              >
+            </div>
+
+            <div
+              class="error"
+              id="newProductBuyError"
+            >
+              Harga modal baru harus lebih dari 0.
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- 3 Produk Sejenis -->
+      <div
+        id="sampleSection"
+        class="card sample-section"
+      >
+
+        <div class="card-title">
+
+          <div class="icon">2</div>
+
+          <div>
+            <h2>3 Sampel Produk Sejenis</h2>
+
+            <p>
+              Masukkan harga modal dan harga jual dari
+              3 produk sejenis.
+            </p>
+          </div>
+
+        </div>
+
+        <p
+          id="sampleDescription"
+          class="sample-intro"
+        >
+          Produk sejenis digunakan untuk mencari AVG Profit.
+        </p>
+
+        <div class="samples">
+
+          <!-- Sampel 1 -->
+          <div class="sample">
+
+            <h3>Produk Sejenis #1</h3>
+
+            <div class="field">
+
+              <label>Harga Modal</label>
+
+              <div class="input-wrap">
+                <span class="prefix">Rp</span>
+
+                <input
+                  class="sample-buy"
+                  type="text"
+                  inputmode="decimal"
+                  autocomplete="off"
+                  data-index="1"
+                  data-field="buy"
+                  placeholder="Masukkan harga modal"
+                >
+              </div>
+
+              <div class="error sample-buy-error">
+                Harga modal harus lebih dari 0.
+              </div>
+
+            </div>
+
+            <div class="field">
+
+              <label>Harga Jual</label>
+
+              <div class="input-wrap">
+                <span class="prefix">Rp</span>
+
+                <input
+                  class="sample-sell"
+                  type="text"
+                  inputmode="decimal"
+                  autocomplete="off"
+                  data-index="1"
+                  data-field="sell"
+                  placeholder="Masukkan harga jual"
+                >
+              </div>
+
+              <div class="error sample-sell-error">
+                Harga jual harus lebih dari 0.
+              </div>
+
+            </div>
+
+          </div>
+
+          <!-- Sampel 2 -->
+          <div class="sample">
+
+            <h3>Produk Sejenis #2</h3>
+
+            <div class="field">
+
+              <label>Harga Modal</label>
+
+              <div class="input-wrap">
+                <span class="prefix">Rp</span>
+
+                <input
+                  class="sample-buy"
+                  type="text"
+                  inputmode="decimal"
+                  autocomplete="off"
+                  data-index="2"
+                  data-field="buy"
+                  placeholder="Masukkan harga modal"
+                >
+              </div>
+
+              <div class="error sample-buy-error">
+                Harga modal harus lebih dari 0.
+              </div>
+
+            </div>
+
+            <div class="field">
+
+              <label>Harga Jual</label>
+
+              <div class="input-wrap">
+                <span class="prefix">Rp</span>
+
+                <input
+                  class="sample-sell"
+                  type="text"
+                  inputmode="decimal"
+                  autocomplete="off"
+                  data-index="2"
+                  data-field="sell"
+                  placeholder="Masukkan harga jual"
+                >
+              </div>
+
+              <div class="error sample-sell-error">
+                Harga jual harus lebih dari 0.
+              </div>
+
+            </div>
+
+          </div>
+
+          <!-- Sampel 3 -->
+          <div class="sample">
+
+            <h3>Produk Sejenis #3</h3>
+
+            <div class="field">
+
+              <label>Harga Modal</label>
+
+              <div class="input-wrap">
+                <span class="prefix">Rp</span>
+
+                <input
+                  class="sample-buy"
+                  type="text"
+                  inputmode="decimal"
+                  autocomplete="off"
+                  data-index="3"
+                  data-field="buy"
+                  placeholder="Masukkan harga modal"
+                >
+              </div>
+
+              <div class="error sample-buy-error">
+                Harga modal harus lebih dari 0.
+              </div>
+
+            </div>
+
+            <div class="field">
+
+              <label>Harga Jual</label>
+
+              <div class="input-wrap">
+                <span class="prefix">Rp</span>
+
+                <input
+                  class="sample-sell"
+                  type="text"
+                  inputmode="decimal"
+                  autocomplete="off"
+                  data-index="3"
+                  data-field="sell"
+                  placeholder="Masukkan harga jual"
+                >
+              </div>
+
+              <div class="error sample-sell-error">
+                Harga jual harus lebih dari 0.
+              </div>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- Hasil -->
+      <div class="card result-card">
+
+        <div class="result-label" id="resultLabel">
+          Harga Jual Baru
+        </div>
+
+        <!-- Hasil normal / Produk Lama -->
+        <div id="singleResult">
+
+          <div class="result-row">
+
+            <div
+              id="newSell"
+              class="price"
+            >
+              -
+            </div>
+
+            <button
+              type="button"
+              id="copyBtn"
+              class="copy-btn"
+              disabled
+            >
+              Copy Nominal
+            </button>
+
+          </div>
+
+        </div>
+
+        <!-- 3 Rekomendasi Produk Baru -->
+        <div id="recommendationResult" class="recommendations hidden">
+
+          <div class="recommendation-item">
+            <span>Harga Minimum</span>
+            <strong id="minimumPrice">-</strong>
+            <button
+              type="button"
+              class="recommendation-copy"
+              data-recommendation="minimum"
+              disabled
+            >
+              Copy Nominal
+            </button>
+          </div>
+
+          <div class="recommendation-item">
+            <span>Harga Median</span>
+            <strong id="medianPrice">-</strong>
+            <button
+              type="button"
+              class="recommendation-copy"
+              data-recommendation="median"
+              disabled
+            >
+              Copy Nominal
+            </button>
+          </div>
+
+          <div class="recommendation-item">
+            <span>Harga Maximum</span>
+            <strong id="maximumPrice">-</strong>
+            <button
+              type="button"
+              class="recommendation-copy"
+              data-recommendation="maximum"
+              disabled
+            >
+              Copy Nominal
+            </button>
+          </div>
+
+        </div>
+
+        <p
+          id="resultMessage"
+          class="result-message"
+        >
+          Lengkapi data untuk mendapatkan harga jual baru.
+        </p>
+
+      </div>
+
+      <!-- Tombol Clear -->
+      <button
+        id="clearBtn"
+        class="btn-clear"
+        type="button"
+      >
+        Bersihkan Data
+      </button>
+
+    </section>
+
+    <footer>
+      Pasifik Teknik 2026
+    </footer>
+
+  </main>
+
+  <script>
+    /* State */
+
+    const state = {
+      mode: "lama",
+      result: null,
+      touched: new Set(),
+      sampleData: {
+        lama: [],
+        baru: []
+      }
+    };
+
+    /* Element */
+
+    const modeButtons = document.querySelectorAll(".mode-btn");
+
+    const oldProductCard = document.getElementById("oldProductCard");
+    const newProductCard = document.getElementById("newProductCard");
+    const sampleSection = document.getElementById("sampleSection");
+
+    const newBuyInput = document.getElementById("newBuy");
+    const increaseInput = document.getElementById("increase");
+    const oldSellInput = document.getElementById("oldSell");
+
+    const newProductBuyInput =
+      document.getElementById("newProductBuy");
+
+    const oldBuyResult =
+      document.getElementById("oldBuyResult");
+
+    const oldBuyValue =
+      document.getElementById("oldBuyValue");
+
+    const resultLabel =
+      document.getElementById("resultLabel");
+
+    const singleResult =
+      document.getElementById("singleResult");
+
+    const recommendationResult =
+      document.getElementById("recommendationResult");
+
+    const minimumPriceEl =
+      document.getElementById("minimumPrice");
+
+    const medianPriceEl =
+      document.getElementById("medianPrice");
+
+    const maximumPriceEl =
+      document.getElementById("maximumPrice");
+
+    const recommendationCopyButtons =
+      document.querySelectorAll(".recommendation-copy");
+
+    const newSellEl =
+      document.getElementById("newSell");
+
+    const copyBtn =
+      document.getElementById("copyBtn");
+
+    const resultMessage =
+      document.getElementById("resultMessage");
+
+    const clearBtn =
+      document.getElementById("clearBtn");
+
+    const sampleInputs =
+      document.querySelectorAll(
+        ".sample-buy, .sample-sell"
+      );
+
+    /* Format Angka */
+
+    const integerFormatter =
+      new Intl.NumberFormat("en-US", {
+        maximumFractionDigits: 0
+      });
+
+    const decimalFormatter =
+      new Intl.NumberFormat("en-US", {
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 2
+      });
+
+    
+    function formatNumber(value) {
+      return decimalFormatter.format(value);
+    }
+
+    
+    function getInputNumber(input) {
+      const value = input.value.trim();
+
+      if (value === "") {
+        return 0;
+      }
+
+      const normalized = value.replace(/,/g, "");
+
+      const number = Number(normalized);
+
+      return Number.isFinite(number)
+        ? number
+        : 0;
+    }
+
+    
+    function formatInput(input) {
+      let value = input.value;
+
+      
+      value = value.replace(/[^\d.,]/g, "");
+
+      
+      const firstDot = value.indexOf(".");
+
+      if (firstDot !== -1) {
+        const integerPart =
+          value.substring(0, firstDot);
+
+        const decimalPart =
+          value
+            .substring(firstDot + 1)
+            .replace(/\./g, "");
+
+        value =
+          integerPart +
+          "." +
+          decimalPart;
+      }
+
+      
+      const parts = value.split(".");
+
+      let integerPart =
+        parts[0].replace(/,/g, "");
+
+      const decimalPart =
+        parts.length > 1
+          ? parts[1].replace(/[^\d]/g, "").slice(0, 2)
+          : null;
+
+      
+      if (
+        integerPart.length > 1 &&
+        integerPart.startsWith("0")
+      ) {
+        integerPart =
+          integerPart.replace(/^0+(?=\d)/, "");
+      }
+
+      
+      if (integerPart === "" && decimalPart !== null) {
+        integerPart = "0";
+      }
+
+      
+      let formattedInteger = "";
+
+      if (integerPart !== "") {
+        formattedInteger =
+          Number(integerPart).toLocaleString("en-US");
+      }
+
+      
+      if (decimalPart !== null) {
+        input.value =
+          formattedInteger +
+          "." +
+          decimalPart;
+      } else {
+        input.value = formattedInteger;
+      }
+    }
+
+    /* Validasi */
+
+    function setError(input, errorElement, show) {
+      const shouldShow =
+        show && state.touched.has(getFieldKey(input));
+
+      errorElement.style.display =
+        shouldShow ? "block" : "none";
+
+      input.classList.toggle(
+        "invalid",
+        shouldShow
+      );
+    }
+
+    function getFieldKey(input) {
+      return input.id ||
+        `${input.dataset.index}-${input.dataset.field}`;
+    }
+
+    function resetErrorText() {
+      document.getElementById(
+        "increaseError"
+      ).textContent =
+        "Jumlah kenaikan harga tidak boleh negatif.";
+    }
+
+    /* Hasil */
+
+    function resetResult() {
+      state.result = null;
+
+      resultLabel.textContent =
+        state.mode === "baru"
+          ? "Rekomendasi Harga Jual"
+          : "Harga Jual Baru";
+
+      singleResult.classList.remove("hidden");
+      recommendationResult.classList.add("hidden");
+
+      newSellEl.textContent = "-";
+
+      minimumPriceEl.textContent = "-";
+      medianPriceEl.textContent = "-";
+      maximumPriceEl.textContent = "-";
+
+      recommendationCopyButtons.forEach(button => {
+        button.disabled = true;
+        button.textContent = "Copy Nominal";
+        button.classList.remove("copied");
+      });
+
+      resultMessage.textContent =
+        "Lengkapi data untuk mendapatkan harga jual baru.";
+
+      copyBtn.disabled = true;
+
+      copyBtn.textContent =
+        "Copy Nominal";
+
+      copyBtn.classList.remove("copied");
+    }
+
+    function showResult(value, message = "Salin Nominal") {
+      state.result = value;
+
+      resultLabel.textContent =
+        "Harga Jual Baru";
+
+      singleResult.classList.remove("hidden");
+      recommendationResult.classList.add("hidden");
+
+      newSellEl.textContent =
+        "Rp " + formatNumber(value);
+
+      resultMessage.textContent = message;
+
+      copyBtn.disabled = false;
+
+      copyBtn.textContent =
+        "Copy Nominal";
+
+      copyBtn.classList.remove("copied");
+    }
+
+    function showRecommendations(minimum, median, maximum, avgProfit) {
+      state.result = null;
+
+      resultLabel.textContent =
+        "Rekomendasi Harga Jual";
+
+      singleResult.classList.add("hidden");
+      recommendationResult.classList.remove("hidden");
+
+      minimumPriceEl.textContent =
+        "Rp " + formatNumber(minimum);
+
+      medianPriceEl.textContent =
+        "Rp " + formatNumber(median);
+
+      maximumPriceEl.textContent =
+        "Rp " + formatNumber(maximum);
+
+      recommendationCopyButtons.forEach(button => {
+        button.disabled = false;
+        button.textContent = "Copy Nominal";
+        button.classList.remove("copied");
+      });
+
+      resultMessage.textContent =
+        "AVG Profit: " + decimalFormatter.format(avgProfit * 100) + "%. Pilih salah satu rekomendasi harga.";
+
+      copyBtn.disabled = true;
+      copyBtn.textContent = "Copy Nominal";
+      copyBtn.classList.remove("copied");
+    }
+
+    /* Rounding */
+
+    function roundPrice(value) {
+      let unit;
+
+      if (value < 1000) {
+        unit = 10;
+      } else if (value < 10000) {
+        unit = 100;
+      } else {
+        unit = 1000;
+      }
+
+      return Math.round(value / unit) * unit;
+    }
+
+    /* Sample Profit */
+
+    function calculateSampleAverageProfit() {
+      const samples =
+        document.querySelectorAll(".sample");
+
+      const profits = [];
+      let allValid = true;
+
+      samples.forEach(sample => {
+        const buyInput =
+          sample.querySelector(".sample-buy");
+
+        const sellInput =
+          sample.querySelector(".sample-sell");
+
+        const buyError =
+          sample.querySelector(".sample-buy-error");
+
+        const sellError =
+          sample.querySelector(".sample-sell-error");
+
+        const buy =
+          getInputNumber(buyInput);
+
+        const sell =
+          getInputNumber(sellInput);
+
+        const validBuy =
+          buy > 0;
+
+        const validSell =
+          sell > 0;
+
+        setError(
+          buyInput,
+          buyError,
+          !validBuy
+        );
+
+        setError(
+          sellInput,
+          sellError,
+          !validSell
+        );
+
+        if (!validBuy || !validSell) {
+          allValid = false;
+          return;
+        }
+
+        const profit =
+          (sell - buy) / buy;
+
+        profits.push(profit);
+      });
+
+      if (
+        !allValid ||
+        profits.length !== 3
+      ) {
+        return null;
+      }
+
+      
+      return (
+        profits[0] +
+        profits[1] +
+        profits[2]
+      ) / 3;
+    }
+
+    /* Produk Lama */
+
+    function calculateOldProduct() {
+      resetErrorText();
+
+      const newBuy =
+        getInputNumber(newBuyInput);
+
+      const increase =
+        getInputNumber(increaseInput);
+
+      const oldSell =
+        getInputNumber(oldSellInput);
+
+      const hasNewBuy =
+        newBuyInput.value.trim() !== "";
+
+      const hasIncrease =
+        increaseInput.value.trim() !== "";
+
+      const hasOldSell =
+        oldSellInput.value.trim() !== "";
+
+      setError(
+        newBuyInput,
+        document.getElementById("newBuyError"),
+        !hasNewBuy || newBuy <= 0
+      );
+
+      setError(
+        increaseInput,
+        document.getElementById("increaseError"),
+        !hasIncrease || increase < 0
+      );
+
+      setError(
+        oldSellInput,
+        document.getElementById("oldSellError"),
+        !hasOldSell || oldSell <= 0
+      );
+
+      if (
+        !hasNewBuy ||
+        newBuy <= 0 ||
+        !hasIncrease ||
+        increase < 0
+      ) {
+        sampleSection.classList.remove("show");
+        oldBuyResult.style.display = "none";
+
+        resetResult();
+        return;
+      }
+
+      const oldBuy =
+        newBuy - increase;
+
+      if (oldBuy <= 0) {
+        sampleSection.classList.remove("show");
+        oldBuyResult.style.display = "block";
+        oldBuyValue.textContent = "-";
+
+        const increaseError =
+          document.getElementById("increaseError");
+
+        increaseError.textContent =
+          "Jumlah kenaikan harga harus lebih kecil dari harga modal baru.";
+
+        increaseError.style.display = "block";
+        increaseInput.classList.add("invalid");
+
+        resetResult();
+        return;
+      }
+
+      oldBuyResult.style.display = "block";
+
+      oldBuyValue.textContent =
+        "Rp " + formatNumber(oldBuy);
+
+      if (
+        !hasOldSell ||
+        oldSell <= 0
+      ) {
+        sampleSection.classList.remove("show");
+        resetResult();
+        return;
+      }
+
+      const profit =
+        (oldSell - oldBuy) / oldBuy;
+
+      /*
+       * KONDISI 1:
+       * Profit <= 20%
+       * Gunakan rumus normal.
+       */
+      if (profit <= 0.20) {
+        sampleSection.classList.remove("show");
+
+        const rawResult =
+          (1 + profit) * newBuy;
+
+        const finalResult =
+          roundPrice(rawResult);
+
+        showResult(finalResult);
+        return;
+      }
+
+      /*
+       * KONDISI 2:
+       * Profit > 20% sampai <= 50%
+       *
+       * Hitung harga jual baru dengan rumus normal.
+       * Jika kenaikan kurang dari Rp10.000,
+       * gunakan harga jual lama.
+       */
+      if (profit > 0.20 && profit <= 0.50) {
+        sampleSection.classList.remove("show");
+
+        const rawResult =
+          (1 + profit) * newBuy;
+
+        const calculatedNewSell =
+          roundPrice(rawResult);
+
+        const difference =
+          calculatedNewSell - oldSell;
+
+        if (difference <= 10000) {
+          showResult(
+            oldSell,
+            "Harga jual tidak dinaikkan karena selisih kenaikan tidak lebih dari Rp10.000."
+          );
+        } else {
+          showResult(calculatedNewSell);
+        }
+
+        return;
+      }
+
+      /*
+       * KONDISI 3:
+       * Profit > 50%
+       *
+       * Gunakan 3 produk sejenis untuk mencari AVG Profit.
+       */
+      if (profit > 0.50) {
+        sampleSection.classList.add("show");
+
+        document.getElementById(
+          "sampleDescription"
+        ).textContent =
+          "Profit produk lama lebih dari 50%. Masukkan 3 produk aktif sejenis untuk mencari AVG Profit Produk Lama.";
+
+        const avgProfit =
+          calculateSampleAverageProfit();
+
+        if (avgProfit === null) {
+          resetResult();
+          return;
+        }
+
+        const rawMinimum =
+          1.2 * newBuy;
+
+        const rawMaximum =
+          (1 + avgProfit) * newBuy;
+
+        const rawMedian =
+          (rawMinimum + rawMaximum) / 2;
+
+        const minimum =
+          roundPrice(rawMinimum);
+
+        const median =
+          roundPrice(rawMedian);
+
+        const maximum =
+          roundPrice(rawMaximum);
+
+        showRecommendations(
+          minimum,
+          median,
+          maximum,
+          avgProfit
+        );
+      }
+    }
+
+    /* Produk Baru */
+
+    function calculateNewProduct() {
+      const newBuy =
+        getInputNumber(newProductBuyInput);
+
+      const hasNewBuy =
+        newProductBuyInput.value.trim() !== "";
+
+      setError(
+        newProductBuyInput,
+        document.getElementById("newProductBuyError"),
+        !hasNewBuy || newBuy <= 0
+      );
+
+      sampleSection.classList.add("show");
+
+      document.getElementById(
+        "sampleDescription"
+      ).textContent =
+        "Produk baru belum memiliki profit. Masukkan 3 produk sejenis untuk mencari AVG Profit.";
+
+      if (
+        !hasNewBuy ||
+        newBuy <= 0
+      ) {
+        resetResult();
+        return;
+      }
+
+      const avgProfit =
+        calculateSampleAverageProfit();
+
+      if (avgProfit === null) {
+        resetResult();
+        return;
+      }
+
+      /*
+       * Produk Baru:
+       * Rekomendasi hanya ditampilkan jika AVG Profit > 20%.
+       */
+      if (avgProfit <= 0.20) {
+        resetResult();
+        resultMessage.textContent =
+          "AVG Profit harus lebih dari 20% untuk menampilkan rekomendasi harga.";
+        return;
+      }
+
+      const rawMinimum =
+        1.2 * newBuy;
+
+      const rawMaximum =
+        (1 + avgProfit) * newBuy;
+
+      const rawMedian =
+        (rawMinimum + rawMaximum) / 2;
+
+      const minimum =
+        roundPrice(rawMinimum);
+
+      const median =
+        roundPrice(rawMedian);
+
+      const maximum =
+        roundPrice(rawMaximum);
+
+      showRecommendations(
+        minimum,
+        median,
+        maximum,
+        avgProfit
+      );
+    }
+
+    /* Calculation */
+
+    function calculate() {
+      if (state.mode === "lama") {
+        calculateOldProduct();
+      } else {
+        calculateNewProduct();
+      }
+    }
+
+    function saveSampleData(mode) {
+      state.sampleData[mode] = Array.from(sampleInputs).map(input => ({
+        index: input.dataset.index,
+        field: input.dataset.field,
+        value: input.value
+      }));
+    }
+
+    function loadSampleData(mode) {
+      const saved = state.sampleData[mode] || [];
+
+      sampleInputs.forEach(input => {
+        const item = saved.find(savedInput =>
+          savedInput.index === input.dataset.index &&
+          savedInput.field === input.dataset.field
+        );
+
+        input.value = item ? item.value : "";
+        input.classList.remove("invalid");
+      });
+
+      document.querySelectorAll(".sample-section .error").forEach(error => {
+        error.style.display = "none";
+      });
+    }
+
+    /* Switch Mode */
+
+    function switchMode(mode) {
+      if (mode === state.mode) {
+        loadSampleData(mode);
+      } else {
+        saveSampleData(state.mode);
+        state.mode = mode;
+        loadSampleData(mode);
+      }
+
+      modeButtons.forEach(button => {
+        button.classList.toggle(
+          "active",
+          button.dataset.mode === mode
+        );
+      });
+
+      if (mode === "lama") {
+        oldProductCard.classList.remove("hidden");
+        newProductCard.classList.add("hidden");
+
+        // Produk Lama menentukan card hanya dari data Produk Lama.
+        sampleSection.classList.remove("show");
+        calculateOldProduct();
+
+      } else {
+        oldProductCard.classList.add("hidden");
+        newProductCard.classList.remove("hidden");
+
+        
+        calculateNewProduct();
+      }
+    }
+
+    modeButtons.forEach(button => {
+      button.addEventListener("click", () => {
+        switchMode(button.dataset.mode);
+      });
+    });
+
+    /* Input Event */
+
+    const allInputs = [
+      newBuyInput,
+      increaseInput,
+      oldSellInput,
+      newProductBuyInput,
+      ...sampleInputs
+    ];
+
+    allInputs.forEach(input => {
+
+      
+      input.addEventListener("input", () => {
+        formatInput(input);
+        input.classList.remove("invalid");
+
+        const relatedErrors =
+          input.parentElement.parentElement
+            .querySelectorAll(".error");
+
+        relatedErrors.forEach(error => {
+          error.style.display = "none";
+        });
+
+        calculate();
+      });
+
+      input.addEventListener("blur", () => {
+        state.touched.add(getFieldKey(input));
+        formatInput(input);
+        calculate();
+      });
+
+    });
+
+    /* Copy Nominal */
+
+    copyBtn.addEventListener(
+      "click",
+      async () => {
+
+        if (state.result === null) {
+          return;
+        }
+
+        const rawNominal =
+          String(state.result);
+
+        try {
+          await navigator.clipboard.writeText(
+            rawNominal
+          );
+
+        } catch (error) {
+
+          
+          const textarea =
+            document.createElement("textarea");
+
+          textarea.value =
+            rawNominal;
+
+          textarea.style.position =
+            "fixed";
+
+          textarea.style.opacity =
+            "0";
+
+          document.body.appendChild(
+            textarea
+          );
+
+          textarea.select();
+
+          document.execCommand(
+            "copy"
+          );
+
+          textarea.remove();
+        }
+
+        copyBtn.textContent =
+          "Berhasil Disalin";
+
+        copyBtn.classList.add(
+          "copied"
+        );
+
+        setTimeout(() => {
+          copyBtn.textContent =
+            "Copy Nominal";
+
+          copyBtn.classList.remove(
+            "copied"
+          );
+        }, 1500);
+      }
+    );
+
+    /* Copy 3 Rekomendasi */
+
+    recommendationCopyButtons.forEach(button => {
+      button.addEventListener("click", async () => {
+        const type = button.dataset.recommendation;
+
+        const priceMap = {
+          minimum: minimumPriceEl.textContent,
+          median: medianPriceEl.textContent,
+          maximum: maximumPriceEl.textContent
+        };
+
+        const displayValue = priceMap[type];
+
+        if (!displayValue || displayValue === "-") {
+          return;
+        }
+
+        // Ambil nominal angka saja, tanpa "Rp" dan tanpa titik/koma.
+        const rawNominal = displayValue
+          .replace(/^Rp\s*/, "")
+          .replace(/,/g, "");
+
+        try {
+          await navigator.clipboard.writeText(rawNominal);
+        } catch (error) {
+          const textarea = document.createElement("textarea");
+
+          textarea.value = rawNominal;
+          textarea.style.position = "fixed";
+          textarea.style.opacity = "0";
+
+          document.body.appendChild(textarea);
+          textarea.select();
+
+          document.execCommand("copy");
+          textarea.remove();
+        }
+
+        button.textContent = "Berhasil Disalin";
+        button.classList.add("copied");
+
+        setTimeout(() => {
+          button.textContent = "Copy Nominal";
+          button.classList.remove("copied");
+        }, 1500);
+      });
+    });
+
+    /* Clear Data */
+
+    clearBtn.addEventListener(
+      "click",
+      () => {
+
+        document
+          .querySelectorAll("input")
+          .forEach(input => {
+            input.value = "";
+            input.classList.remove("invalid");
+          });
+
+        state.sampleData.lama = [];
+        state.sampleData.baru = [];
+
+        document
+          .querySelectorAll(".error")
+          .forEach(error => {
+            error.style.display = "none";
+          });
+
+        oldBuyResult.style.display =
+          "none";
+
+        resetErrorText();
+
+        resetResult();
+
+        
+        if (state.mode === "lama") {
+          sampleSection.classList.remove("show");
+
+          newBuyInput.focus();
+
+        } else {
+          sampleSection.classList.add("show");
+
+          newProductBuyInput.focus();
+        }
+      }
+    );
+
+    switchMode("lama");
+  </script>
+
+</body>
+</html>
